@@ -36,9 +36,9 @@ def parameter_injection_attack(alice: object, bob: object):
 
     # M -> A
 
-    # Finding the key after replacing A and B with p is, in fact, very easy.
-    # Instead of (B^a % p) or (A^b % p), the shared secret key of the exercise became (p^a % p)
-    # and (p^b % p), both equal to zero!
+    # Поиск ключа после замены A и B на p, на самом деле, очень прост.
+    # Вместо (B ^ a% p) или (A ^ b% p) общий секретный ключ упражнения стал (p ^ a% p)
+    # и (p ^ b% p), оба равны нулю!
     mitm_key = hashlib.sha1(b'0').digest()[:AES.block_size]
 
     mitm_iv_a = cipher_a[-block_size:]

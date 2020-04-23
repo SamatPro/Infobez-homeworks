@@ -5,52 +5,52 @@ from Crypto.Cipher import AES
 
 def malicious_g_attack():
     """
-    Simulates the break of Diffie-Hellman with negotiated groups by using malicious 'g' parameters.
+    Имитирует разрыв Диффи-Хеллмана с согласованными группами с использованием вредоносных параметров «g».
     """
 
     p = DiffieHellman.DEFAULT_P
     return_vals = []
 
-    # This loops over the values proposed for "g" by the question.
+    # Это перебирает значения, предложенные для «g» вопросом.
     for g in [1, p, p - 1]:
 
-        # Step 1: the MITM changes the default g sent by Alice to Bob with a forced value.
+        # Шаг 1: MITM изменяет значение по умолчанию, отправленное Алисой Бобу с принудительным значением.
         alice = DiffieHellman()
         bob = DiffieHellman(g=g)
 
-        # Step 2: Bob receives this forced g and sends an ACK to Alice.
+        # Шаг 2: Боб получает это принудительное g и посылает ACK Алисе.
 
-        # Step 3: Alice computes A and sends it to the MITM (thinking of Bob).
+        # Шаг 3: Алиса вычисляет A и отправляет его в MITM (думая о Бобе).
         A = alice.gen_public_key()
 
-        # Step 4: Bob computes B and sends it to the MITM (thinking of Alice).
+        # Шаг 4: Боб вычисляет B и отправляет его в MITM (думает об Алисе).
         B = bob.gen_public_key()
 
-        # Step 5: Alice sends her encrypted message to Bob (without knowledge of MITM).
+        # Шаг 5: Алиса отправляет свое зашифрованное сообщение Бобу (без знания MITM).
         _msg = b"Hello, how are you?"
         _a_key = hashlib.sha1(str(alice.gen_shared_secret_key(B)).encode()).digest()[:16]
         _a_iv = os.urandom(AES.block_size)
         a_question = AES_CBC_encrypt(_msg, _a_iv, _a_key) + _a_iv
 
-        # Step 6: Bob receives the message sent by Alice (without knowing of the attack)
-        # However, this time Bob will not be able to decrypt it, because (if I understood the
-        # challenge task correctly) Alice and Bob now use different values of g.
+        # Шаг 6: Боб получает сообщение, отправленное Алисой (не зная об атаке)
+        # Однако на этот раз Боб не сможет расшифровать его, потому что (если я понял
+        # Задача правильно задана) Алиса и Боб теперь используют разные значения g.
 
-        # Step 7: the MITM decrypts the Alice's question.
+        # Шаг 7: MITM расшифровывает вопрос Алисы.
         mitm_a_iv = a_question[-AES.block_size:]
 
-        # When g is 1, the secret key is also 1.
+        # Когда g равен 1, секретный ключ также равен 1.
         if g == 1:
             mitm_hacked_key = hashlib.sha1(b'1').digest()[:16]
             mitm_hacked_message = AES_CBC_decrypt(a_question[:-AES.block_size], mitm_a_iv, mitm_hacked_key)
 
-        # When g is equal to p, it works the same as in the S5C34 attack (the secret key is 0).
+        # Когда g равно p, оно работает так же, как и при атаке S5C34 (секретный ключ равен 0).
         elif g == p:
             mitm_hacked_key = hashlib.sha1(b'0').digest()[:16]
             mitm_hacked_message = AES_CBC_decrypt(a_question[:-AES.block_size], mitm_a_iv, mitm_hacked_key)
 
-        # When g is equal to p - 1, the secret key is (-1)^(ab), which is either (+1 % p) or (-1 % p).
-        # We can try both and later check the padding to see which one is correct.
+        # Когда g равно p - 1, секретный ключ равен (-1) ^ (ab), что равно (+1% p) или (-1% p).
+        # Мы можем попробовать оба варианта, а затем проверить заполнение, чтобы увидеть, какой из них правильный.
         else:
 
             for candidate in [str(1).encode(), str(p - 1).encode()]:
