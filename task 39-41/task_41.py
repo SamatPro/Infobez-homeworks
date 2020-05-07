@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 # Реализация Unpadded Message Recovery Oracle
-from prob33 import mypow
-from prob39 import generatePrime, invmod
+from task_39 import mypow
+from task_39 import generatePrime, invmod
 
 # Это оказывается тривиально разрушаемым:
 def generate_rsa_key(bits, e=65537):

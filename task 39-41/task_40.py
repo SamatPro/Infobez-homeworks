@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 # Реализует E=3 RSA Broadcast attack
-from prob39 import egcd, invmod, generatePrime
-from prob33 import mypow
+# импортируем из 39 таска
+from task_39 import egcd, invmod, generatePrime
+from task_39 import mypow
 
 
 def do_CRT(a_list, N_list):
